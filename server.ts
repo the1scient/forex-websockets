@@ -43,8 +43,9 @@ function connect() {
 connect();
 
     //send immediatly a feedback to the incoming connection    
-    ws.send('Websocket connected');
+    ws.send('Connected');
 });
+
 
 
 module.exports = app;
