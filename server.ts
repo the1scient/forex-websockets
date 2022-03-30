@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
-
+import protobuf from 'protobufjs';
 
 
 const app = express();
@@ -15,35 +15,33 @@ const wss = new WebSocket.Server({ server });
 let ws = WebSocket;
 wss.on('connection', (ws: WebSocket) => {
 
-  const tradermade = new WebSocket('wss://marketdata.tradermade.com/feedadv');
+  const root = new protobuf.Root().loadSync('./YPricingData.proto', {keepCase: true});
 
-function connect() {
-  
-  tradermade.on('open', function open() {
-    tradermade.send("{\"userKey\":\"sioZfyXNXtuji47n2BMGA\", \"symbol\":\"GBPUSD\"}");
- });
-
- tradermade.on('message', function incoming(data: object) {
-  //console.log(data.toString('utf8'));
-
-  ws.send(data.toString());
+const Yaticker = root.lookupType("yaticker");
+const Yahoo = new WebSocket('wss://streamer.finance.yahoo.com');
 
 
+Yahoo.onopen = function open() {
+  console.log('[WEBSOCKET] Successfully connected!');
+  Yahoo.send(JSON.stringify({
+      subscribe: ['GBPUSD=X', 'GBP=X']
+  }));
+};
 
-  tradermade.on('close', function() {
-    setTimeout(function() {
-     connect(); 
-     
-    }, 1000);
-  });
+Yahoo.onmessage = function incoming(data: { data: string}) {
 
-});
+  console.log(Yaticker.decode(new Buffer(data.data, 'base64')));
+  ws.send(JSON.stringify(Yaticker.decode(new Buffer(data.data, 'base64'))));
 
-}
-connect();
+};
 
-    //send immediatly a feedback to the incoming connection    
+
+
+
+  //send immediatly a feedback to the incoming connection    
     ws.send('Connected');
+
+
 });
 
 
@@ -54,5 +52,5 @@ export { wss as server };
 
 //start our server
 server.listen(3001, async () => {
-   // await console.log(`Server started on port 3001 :) `);
+   await console.log(`Server started on port 3001 :) `);
 });
