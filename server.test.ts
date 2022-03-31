@@ -13,19 +13,19 @@ describe('testing websocket server', () => {
             ws.send('something');
         };
         
+        
+
         // when the connection is open, expect the server to send us some data
         ws.onmessage = (event) => {
             // Connected
-            expect(event.data).toBe('User Key Used to many times');
+            expect(event.data).toContain('id');
             done();
         };
 
 
-            // when the connection is open, expect the server to send us some data
+        // when the connection is closed, expect status Code to be 1000
             ws.onclose = (event) => {
                 expect(event.code).toBe(1000);
-                console.log(event);
-                console.log(typeof(event));
                 done();
             };
 
@@ -33,8 +33,6 @@ describe('testing websocket server', () => {
 
 
     });
-
-// create a test that tests a websocket inside another websocket
     
 
 

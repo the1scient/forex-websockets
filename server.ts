@@ -21,26 +21,18 @@ const Yaticker = root.lookupType("yaticker");
 const Yahoo = new WebSocket('wss://streamer.finance.yahoo.com');
 
 
-Yahoo.onopen = function open() {
-  console.log('[WEBSOCKET] Successfully connected!');
-  Yahoo.send(JSON.stringify({
+Yahoo.onopen = async function open() {
+  await Yahoo.send(JSON.stringify({
       subscribe: ['GBPUSD=X', 'GBP=X']
   }));
 };
 
-Yahoo.onmessage = function incoming(data: { data: string}) {
 
-  console.log(Yaticker.decode(new Buffer(data.data, 'base64')));
-  ws.send(JSON.stringify(Yaticker.decode(new Buffer(data.data, 'base64'))));
+Yahoo.onmessage = async function incoming(data: { data: string}) {
+
+  await ws.send(JSON.stringify(Yaticker.decode(new Buffer(data.data, 'base64'))));
 
 };
-
-
-
-
-  //send immediatly a feedback to the incoming connection    
-    ws.send('Connected');
-
 
 });
 
